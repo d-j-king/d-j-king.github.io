@@ -62,13 +62,13 @@ header {
 }
 
 .avatar {
-  width: 72px;
-  height: 72px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
   object-fit: cover;
-  object-position: left top;
+  object-position: 55% 10%;
   flex-shrink: 0;
-  background: var(--border); /* fallback if image missing */
+  background: var(--border); 
 }
 
 .header-text h1 {
