@@ -66,6 +66,7 @@ header {
   height: 72px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: left top;
   flex-shrink: 0;
   background: var(--border); /* fallback if image missing */
 }
