@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="blue">
+<html lang="en" data-theme="parchment">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,16 +71,16 @@
   </main>
 
   <div id="theme-switcher" aria-label="Theme switcher">
-    <button data-theme="blue"  style="background:#1d4ed8" title="Blue"></button>
-    <button data-theme="amber" style="background:#d97706" title="Amber"></button>
-    <button data-theme="red"   style="background:#b91c1c" title="Red"></button>
-    <button data-theme="navy"  style="background:#0f172a" title="Navy"></button>
-    <button data-theme="mono"  style="background:#374151" title="Mono"></button>
+    <button data-theme="parchment" style="background:#c2410c" title="Parchment"></button>
+    <button data-theme="fog"       style="background:#0e7490" title="Fog"></button>
+    <button data-theme="navy"      style="background:#0f172a" title="Navy"></button>
+    <button data-theme="charcoal"  style="background:#fbbf24" title="Charcoal"></button>
+    <button data-theme="forest"    style="background:#34d399" title="Forest"></button>
   </div>
 
   <script>
     (function () {
-      var saved = localStorage.getItem('theme') || 'blue';
+      var saved = localStorage.getItem('theme') || 'parchment';
       document.documentElement.setAttribute('data-theme', saved);
 
       var btns = document.querySelectorAll('#theme-switcher button');
