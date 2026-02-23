@@ -65,8 +65,15 @@
       <a href="https://www.policygradients.com/">Policy Gradients on Substack</a>
       <a href="https://www.linkedin.com/in/d-j-k">LinkedIn</a>
       <a href="https://twitter.com/The_DanielKing">Twitter&thinsp;/&thinsp;X</a>
+      <a href="#" id="email-link">Email</a>
     </footer>
 
   </main>
+  <script>
+    var el = document.getElementById('email-link');
+    var addr = ['mx.danielw', 'gmail.com'].join('@');
+    el.href = 'mailto:' + addr;
+    el.textContent = addr;
+  </script>
 </body>
 </html>
