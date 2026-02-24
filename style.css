@@ -247,6 +247,9 @@ h2 {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 .work-list .press a:hover {
