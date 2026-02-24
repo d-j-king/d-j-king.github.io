@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="parchment">
+<html lang="en" data-theme="navy"><!-- theme options: navy | parchment | fog | charcoal | forest -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,36 +69,11 @@
     </footer>
 
   </main>
-
-  <div id="theme-switcher" aria-label="Theme switcher">
-    <button data-theme="parchment" style="background:#c2410c" title="Parchment"></button>
-    <button data-theme="fog"       style="background:#0e7490" title="Fog"></button>
-    <button data-theme="navy"      style="background:#0f172a" title="Navy"></button>
-    <button data-theme="charcoal"  style="background:#fbbf24" title="Charcoal"></button>
-    <button data-theme="forest"    style="background:#34d399" title="Forest"></button>
-  </div>
-
   <script>
-    (function () {
-      var saved = localStorage.getItem('theme') || 'parchment';
-      document.documentElement.setAttribute('data-theme', saved);
-
-      var btns = document.querySelectorAll('#theme-switcher button');
-      btns.forEach(function (btn) {
-        if (btn.dataset.theme === saved) btn.classList.add('active');
-        btn.addEventListener('click', function () {
-          document.documentElement.setAttribute('data-theme', this.dataset.theme);
-          localStorage.setItem('theme', this.dataset.theme);
-          btns.forEach(function (b) { b.classList.remove('active'); });
-          this.classList.add('active');
-        });
-      });
-
-      var el = document.getElementById('email-link');
-      var addr = ['danielk.self', 'gmail.com'].join('@');
-      el.href = 'mailto:' + addr;
-      el.textContent = addr;
-    })();
+    var el = document.getElementById('email-link');
+    var addr = ['danielk.self', 'gmail.com'].join('@');
+    el.href = 'mailto:' + addr;
+    el.textContent = addr;
   </script>
 </body>
 </html>
