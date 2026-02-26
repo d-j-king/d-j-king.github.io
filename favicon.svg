@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Navy circle -->
+  <circle cx="16" cy="16" r="15.5" fill="#0f172a"/>
+  <!-- Thin accent ring -->
+  <circle cx="16" cy="16" r="14.5" fill="none" stroke="#38bdf8" stroke-width="0.75" stroke-opacity="0.5"/>
+
+  <!-- D: upper-left, drawn first (sits behind K) -->
+  <text
+    x="9" y="19"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="17"
+    font-weight="700"
+    fill="#38bdf8">D</text>
+
+  <!-- K: lower-right, drawn on top -->
+  <!-- The background-colored stroke creates a separation halo at the overlap,
+       giving the classic interlocked monogram depth effect -->
+  <text
+    x="16" y="25"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="17"
+    font-weight="700"
+    fill="#38bdf8"
+    stroke="#0f172a"
+    stroke-width="2"
+    paint-order="stroke fill">K</text>
+</svg>
