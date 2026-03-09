@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="navy">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule a Meeting — Daniel King</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .book-wrap {
+      max-width: 520px;
+      margin: 2.5rem auto;
+      padding: 0 1.25rem 3rem;
+    }
+    .book-header { margin-bottom: 1.75rem; }
+    .book-header h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: .3rem; }
+    .book-header p { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+    .book-meta {
+      display: flex; gap: .6rem; flex-wrap: wrap;
+      margin-top: .6rem; font-size: .8rem; color: var(--muted);
+    }
+    .book-meta span { display: flex; align-items: center; gap: .25rem; }
+
+    h2 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 .75rem; }
+
+    /* Date picker */
+    .date-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: .75rem;
+    }
+    .date-nav button {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); cursor: pointer; padding: .3rem .65rem; font-size: .9rem;
+      transition: background .15s;
+    }
+    .date-nav button:hover { background: var(--border); }
+    .date-nav button:disabled { opacity: .3; cursor: default; }
+    .date-label { font-weight: 500; font-size: .95rem; }
+
+    .day-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem;
+      margin-bottom: 1rem;
+    }
+    .day-cell {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; font-size: .82rem; cursor: pointer;
+      border: 1px solid transparent; transition: background .12s, border-color .12s;
+    }
+    .day-cell.available { border-color: var(--border); }
+    .day-cell.available:hover { background: var(--border); }
+    .day-cell.selected { background: var(--accent); color: #0f172a; font-weight: 600; border-color: var(--accent); }
+    .day-cell.today { border-color: var(--accent); }
+    .day-cell.unavailable { color: var(--muted); opacity: .4; cursor: default; }
+    .day-cell.header { color: var(--muted); font-size: .75rem; cursor: default; }
+
+    /* Slot list */
+    .slots-wrap { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1.5rem; }
+    .slot-btn {
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); cursor: pointer; padding: .6rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .88rem; transition: background .12s, border-color .12s;
+      font-family: inherit;
+    }
+    .slot-btn:hover { background: var(--border); }
+    .slot-btn.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+    .slot-preferred {
+      font-size: .7rem; background: color-mix(in srgb, var(--accent) 18%, transparent);
+      color: var(--accent); border-radius: 100px; padding: .1rem .5rem;
+    }
+
+    /* Booking form */
+    .book-form { display: flex; flex-direction: column; gap: .8rem; }
+    label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: .3rem; }
+    input, textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: inherit; font-size: .88rem;
+      padding: .5rem .75rem; outline: none; transition: border-color .15s;
+      box-sizing: border-box;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 70px; }
+
+    .submit-btn {
+      background: var(--accent); border: none; border-radius: 8px; color: #0f172a;
+      cursor: pointer; font-family: inherit; font-size: .9rem; font-weight: 600;
+      padding: .65rem 1.25rem; transition: opacity .15s;
+    }
+    .submit-btn:hover { opacity: .85; }
+    .submit-btn:disabled { opacity: .5; cursor: default; }
+
+    .msg { font-size: .88rem; color: var(--muted); margin-top: .5rem; }
+    .msg.error { color: #f87171; }
+    .msg.success { color: #4ade80; }
+
+    .confirmed-card {
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border: 1px solid var(--accent); border-radius: 10px;
+      padding: 1.25rem; margin-top: 1rem;
+    }
+    .confirmed-card h2 { margin-top: 0; color: var(--accent); }
+    .confirmed-card p { margin: .3rem 0; font-size: .88rem; color: var(--muted); }
+
+    .spinner {
+      width: 20px; height: 20px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .7s linear infinite; margin: 1rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty { color: var(--muted); font-size: .88rem; padding: .5rem 0; }
+
+    .back-link { color: var(--accent); font-size: .85rem; text-decoration: none; display: inline-block; margin-bottom: 1.5rem; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<main class="book-wrap">
+  <a class="back-link" href="https://danielk.ing">← danielk.ing</a>
+  <div id="root"><div class="spinner"></div></div>
+</main>
+
+<script type="module">
+  const WORKER = "https://cc-booking.mx-danielw.workers.dev";
+  const DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const MONTHS = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+  const WEEKDAY_CODE = ["SU","MO","TU","WE","TH","FR","SA"];
+
+  const root  = document.getElementById("root");
+  const slug  = new URLSearchParams(location.search).get("slug") || "";
+
+  let link       = null;
+  let curYear    = new Date().getFullYear();
+  let curMonth   = new Date().getMonth();
+  let selDate    = null;   // "YYYY-MM-DD"
+  let selSlot    = null;   // slot object
+  let slots      = [];
+  let slotsLoading = false;
+
+  // ── Bootstrap ─────────────────────────────────────────────────────────────
+
+  async function init() {
+    if (!slug) { root.innerHTML = `<p class="msg error">No booking link specified.</p>`; return; }
+    try {
+      link = await api(`/public/${slug}`);
+    } catch {
+      root.innerHTML = `<p class="msg error">Booking link not found or inactive.</p>`;
+      return;
+    }
+    document.title = `${link.title} — Daniel King`;
+    render();
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  function render() {
+    root.innerHTML = "";
+
+    // Header
+    const header = el("div", "book-header");
+    header.innerHTML = `
+      <h1>${link.title}</h1>
+      ${link.description ? `<p>${link.description}</p>` : ""}
+      <div class="book-meta">
+        <span>⏱ ${link.duration_minutes} min</span>
+        <span>📅 Available up to ${link.booking_window_days} days out</span>
+      </div>
+    `;
+    root.appendChild(header);
+
+    // Date picker
+    const dateSection = el("div");
+    dateSection.appendChild(renderCalendar());
+    root.appendChild(dateSection);
+
+    // Slots
+    const slotSection = el("div", "", "slot-section");
+    root.appendChild(slotSection);
+
+    // Form (shown after slot selected)
+    const formSection = el("div", "", "form-section");
+    root.appendChild(formSection);
+  }
+
+  function renderCalendar() {
+    const wrap = el("div");
+
+    const nav = el("div", "date-nav");
+    const prevBtn = elBtn("‹", () => { curMonth--; if (curMonth < 0) { curMonth = 11; curYear--; } refreshCalendar(); });
+    const nextBtn = elBtn("›", () => { curMonth++; if (curMonth > 11) { curMonth = 0; curYear++; } refreshCalendar(); });
+    const label = el("span", "date-label", "cal-label");
+    label.textContent = `${MONTHS[curMonth]} ${curYear}`;
+
+    const today = new Date();
+    prevBtn.disabled = curYear === today.getFullYear() && curMonth === today.getMonth();
+
+    nav.append(prevBtn, label, nextBtn);
+    wrap.appendChild(nav);
+
+    const grid = el("div", "day-grid", "day-grid");
+    // Header row
+    for (const d of ["Su","Mo","Tu","We","Th","Fr","Sa"]) {
+      const cell = el("div", "day-cell header"); cell.textContent = d; grid.appendChild(cell);
+    }
+
+    const firstDay = new Date(curYear, curMonth, 1).getDay();
+    const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+    for (let i = 0; i < firstDay; i++) grid.appendChild(el("div", "day-cell"));
+
+    const availCodes = new Set(link.available_days);
+    const todayStr = fmtDate(today);
+    const maxDate  = new Date(today);
+    maxDate.setDate(maxDate.getDate() + link.booking_window_days);
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(curYear, curMonth, d);
+      const dateStr = fmtDate(date);
+      const code = WEEKDAY_CODE[date.getDay()];
+      const past = dateStr < todayStr;
+      const tooFar = date > maxDate;
+      const allowed = availCodes.has(code) && !past && !tooFar;
+
+      const cell = el("div", `day-cell ${allowed ? "available" : "unavailable"}${dateStr === todayStr ? " today" : ""}${dateStr === selDate ? " selected" : ""}`);
+      cell.textContent = d;
+      if (allowed) {
+        cell.addEventListener("click", () => selectDate(dateStr));
+      }
+      grid.appendChild(cell);
+    }
+
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  function refreshCalendar() {
+    const calWrap = root.querySelector(".book-header")?.nextElementSibling;
+    if (calWrap) calWrap.replaceWith(renderCalendar());
+  }
+
+  async function selectDate(dateStr) {
+    selDate = dateStr;
+    selSlot = null;
+    refreshCalendar();
+    const slotSection = root.querySelector("#slot-section");
+    const formSection = root.querySelector("#form-section");
+    if (formSection) formSection.innerHTML = "";
+
+    slotSection.innerHTML = `<h2>${fmtDateLabel(dateStr)}</h2><div class="spinner"></div>`;
+
+    try {
+      slots = await api(`/public/${slug}/slots?date=${dateStr}`);
+    } catch {
+      slotSection.innerHTML += `<p class="msg error">Could not load slots.</p>`;
+      return;
+    }
+
+    renderSlots(slotSection, dateStr);
+  }
+
+  function renderSlots(container, dateStr) {
+    container.innerHTML = `<h2>${fmtDateLabel(dateStr)}</h2>`;
+    if (!slots.length) {
+      container.innerHTML += `<p class="empty">No availability on this day.</p>`;
+      return;
+    }
+    const wrap = el("div", "slots-wrap");
+    for (const slot of slots) {
+      const btn = el("button", `slot-btn${slot.start === selSlot?.start ? " selected" : ""}`);
+      btn.innerHTML = `
+        <span>${fmtTime(slot.start)} – ${fmtTime(slot.end)}</span>
+        ${slot.preferred ? `<span class="slot-preferred">preferred</span>` : ""}
+      `;
+      btn.addEventListener("click", () => {
+        selSlot = slot;
+        container.querySelectorAll(".slot-btn").forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        renderForm();
+      });
+      wrap.appendChild(btn);
+    }
+    container.appendChild(wrap);
+  }
+
+  function renderForm() {
+    const formSection = root.querySelector("#form-section");
+    formSection.innerHTML = `
+      <h2>Your details</h2>
+      <div class="book-form">
+        <div>
+          <label>Name *</label>
+          <input id="f-name" type="text" placeholder="Jane Smith" autocomplete="name" />
+        </div>
+        <div>
+          <label>Email *</label>
+          <input id="f-email" type="email" placeholder="jane@example.com" autocomplete="email" />
+        </div>
+        <div>
+          <label>Notes (optional)</label>
+          <textarea id="f-notes" placeholder="Anything you'd like Daniel to know beforehand"></textarea>
+        </div>
+        <div id="f-msg" class="msg"></div>
+        <button class="submit-btn" id="f-submit">Confirm booking</button>
+      </div>
+    `;
+    formSection.querySelector("#f-submit").addEventListener("click", submitBooking);
+  }
+
+  async function submitBooking() {
+    const name  = root.querySelector("#f-name").value.trim();
+    const email = root.querySelector("#f-email").value.trim();
+    const notes = root.querySelector("#f-notes").value.trim();
+    const msgEl = root.querySelector("#f-msg");
+    const btn   = root.querySelector("#f-submit");
+
+    if (!name)  { msgEl.textContent = "Name is required.";  msgEl.className = "msg error"; return; }
+    if (!email) { msgEl.textContent = "Email is required."; msgEl.className = "msg error"; return; }
+
+    btn.disabled = true;
+    btn.textContent = "Booking…";
+    msgEl.textContent = "";
+
+    try {
+      await api(`/public/${slug}/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ booker_name: name, booker_email: email, start_time: selSlot.start, notes }),
+      });
+      showConfirmed(name, email);
+    } catch (err) {
+      msgEl.textContent = err.message || "Booking failed. Please try again.";
+      msgEl.className = "msg error";
+      btn.disabled = false;
+      btn.textContent = "Confirm booking";
+    }
+  }
+
+  function showConfirmed(name, email) {
+    const formSection = root.querySelector("#form-section");
+    formSection.innerHTML = `
+      <div class="confirmed-card">
+        <h2>You're booked ✓</h2>
+        <p><strong>${link.title}</strong></p>
+        <p>${fmtDateLabel(selDate)} at ${fmtTime(selSlot.start)} – ${fmtTime(selSlot.end)} (Chicago time)</p>
+        <p>A calendar invite has been sent to <strong>${email}</strong>.</p>
+      </div>
+    `;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  async function api(path, opts = {}) {
+    const resp = await fetch(WORKER + path, opts);
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      throw new Error(data.error || `Request failed (${resp.status})`);
+    }
+    return resp.json();
+  }
+
+  function el(tag, className = "", id = "") {
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    if (id) e.id = id;
+    return e;
+  }
+
+  function elBtn(text, onClick) {
+    const b = document.createElement("button");
+    b.textContent = text;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function fmtDate(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function fmtDateLabel(dateStr) {
+    const d = new Date(dateStr + "T12:00:00");
+    return `${DAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`;
+  }
+
+  function fmtTime(iso) {
+    return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Chicago" });
+  }
+
+  init();
+</script>
+</body>
+</html>
