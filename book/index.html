@@ -128,7 +128,26 @@
   const WEEKDAY_CODE = ["SU","MO","TU","WE","TH","FR","SA"];
 
   const root  = document.getElementById("root");
-  const slug  = new URLSearchParams(location.search).get("slug") || "";
+
+  // Support clean URLs like /book/coffee-chat via GitHub Pages 404 redirect trick.
+  // If we landed here via 404.html, sessionStorage holds the original path.
+  (function restoreUrl() {
+    const redirect = sessionStorage.getItem('ghpages_redirect');
+    if (redirect) {
+      sessionStorage.removeItem('ghpages_redirect');
+      history.replaceState(null, null, redirect);
+    }
+  })();
+
+  // Read slug from path (/book/<slug>) or fall back to ?slug= query param.
+  function getSlug() {
+    const parts = location.pathname.split('/').filter(Boolean);
+    // pathname like /book/coffee-chat → parts = ['book', 'coffee-chat']
+    if (parts.length >= 2 && parts[0] === 'book') return parts[1];
+    return new URLSearchParams(location.search).get("slug") || "";
+  }
+
+  const slug  = getSlug();
 
   let link       = null;
   let curYear    = new Date().getFullYear();
