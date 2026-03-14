@@ -80,6 +80,7 @@
     }
     input:focus, textarea:focus { border-color: var(--accent); }
     textarea { resize: vertical; min-height: 70px; }
+    .field-hint { font-size: .75rem; color: var(--muted); margin: -.1rem 0 .4rem; }
 
     .submit-btn {
       background: var(--accent); border: none; border-radius: 8px; color: #0f172a;
@@ -315,7 +316,8 @@
           <input id="f-email" type="email" placeholder="jane@example.com" autocomplete="email" />
         </div>
         <div>
-          <label>Notes (optional)</label>
+          <label>Meeting Topic (optional)</label>
+          <p class="field-hint">An informal ramble is more than fine.</p>
           <textarea id="f-notes" placeholder="Anything you'd like Daniel to know beforehand"></textarea>
         </div>
         <div id="f-msg" class="msg"></div>
