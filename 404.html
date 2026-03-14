@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>danielk.ing</title>
+  <script>
+    var path = location.pathname;
+    if (path.startsWith('/book/') && path.length > 6) {
+      // SPA redirect for /book/<slug> — book/index.html restores the path
+      sessionStorage.setItem('ghpages_redirect', path);
+      location.replace('/book/');
+    } else {
+      location.replace('/');
+    }
+  </script>
+</head>
+<body></body>
+</html>
