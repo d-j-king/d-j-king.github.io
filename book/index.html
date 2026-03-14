@@ -130,16 +130,6 @@
 
   const root  = document.getElementById("root");
 
-  // Support clean URLs like /book/coffee-chat via GitHub Pages 404 redirect trick.
-  // If we landed here via 404.html, sessionStorage holds the original path.
-  (function restoreUrl() {
-    const redirect = sessionStorage.getItem('ghpages_redirect');
-    if (redirect) {
-      sessionStorage.removeItem('ghpages_redirect');
-      history.replaceState(null, null, redirect);
-    }
-  })();
-
   // Read slug from path (/book/<slug>) or fall back to ?slug= query param.
   function getSlug() {
     const parts = location.pathname.split('/').filter(Boolean);
